@@ -1,44 +1,31 @@
-import re
-
 from typing import List
 
-lookup = {
+LOOKUP_INTS = {
+    "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
+}
+LOOKUP_FULL = {
+    "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9
 }
 
 def parse_line(line: str, allow_word_nums: bool) -> int:
-    tokens = []
-    for i in range(len(line)):
-        if line[i].isdigit():
-            tokens.append(line[i])
-            continue
-        if not allow_word_nums:
-            continue
-        for t in lookup.keys():
-            if line[i:].startswith(t):
-                tokens.append(t)
-                break
+    lookup = LOOKUP_FULL if allow_word_nums else LOOKUP_INTS
 
-    def convert(t):
-        if t.isdigit():
-            return int(t)
-        return lookup[t]
+    def scan(reverse: bool) -> str:
+        for i in range(len(line)):
+            for token in lookup.keys():
+                segment = line[len(line)-i-1:len(line)] if reverse else line[i:]
+                if segment.startswith(token):
+                    return lookup[token]
 
-    return convert(tokens[0]) * 10 + convert(tokens[-1])
-
-def part1(lines: List[str]):
-    return sum((parse_line(l, False) for l in lines))
-
-def part2(lines: List[str]):
-    return sum((parse_line(l, True) for l in lines))
+    return scan(reverse=False)*10 + scan(reverse=True)
 
 def main():
-    words = []
     with open("input.txt", "r") as f:
-        words = f.readlines()
+        lines = f.readlines()
 
-    print("Part 1", part1(words))
-    print("Part 2", part2(words))
+    print("Part 1", sum((parse_line(l, False) for l in lines)))
+    print("Part 2", sum((parse_line(l, True) for l in lines)))
 
 if __name__ == "__main__":
     main()
